@@ -48,7 +48,7 @@ def main():
     cspl = spl[spl_index]
 
     servers = rootNSs
-    server = rootNSs[0]
+    server = rootNSs[5]
     server_index = 0
     result = ""
 
@@ -56,8 +56,8 @@ def main():
     test_server = '185.31.17.78'
     while True:
         log("[spl]", cspl)
-        query = dns.message.make_query(test_cspl, dns.rdatatype.A)
-        response = dns.query.tcp(query, test_server)
+        query = dns.message.make_query(cspl, dns.rdatatype.NS)
+        response = dns.query.tcp(query, server)
 
         answer = response.answer
         additional = response.additional
