@@ -2,25 +2,7 @@ import sys
 import dns.resolver
 from dns.rcode import Rcode
 
-
-# def resolveDNS():
-#     domain = "google.com"
-#     resolver = dns.resolver.Resolver();
-#     answer = resolver.resolve(domain , "A")
-#     return answer
-#
-#
-# resultDNS = resolveDNS()
-# answer = ''
-#
-# for item in resultDNS:
-#     resultant_str = ','.join([str(item), answer])
-#     print(resultant_str)
-# exit(0)
-
-
-def main():
-    rootNSs = [
+_root_ns = [
         "198.41.0.4",
         "199.9.14.201",
         "192.33.4.12",
@@ -34,29 +16,36 @@ def main():
         "193.0.14.129",
         "199.7.83.42"]
 
-    # if len(sys.argv) != 2:
-    #     print("Invalid number of arguments :: Please provide 1 argument for domain name.")
-    #     exit(0)
 
-    # domain = "www.cnn.com"
-    domain = 'cnn-tls.map.fastly.net'
-    splits = domain.split('.')
+_domain = ''
+_spl = []
+_spl_index = 0
+_cspl = ''
+
+
+def set_domain(dom):
+    global _domain, _spl, _spl_index, _cspl
+    _domain = dom
+    _splits = _domain.split('.')
     spl = []
-    for i in range(len(splits)):
-        spl.append('.'.join(splits[len(splits)-i-1:]))
-    spl_index = 0
-    cspl = spl[spl_index]
+    for i in range(len(_splits)):
+        _spl.append('.'.join(_splits[len(_splits) - i - 1:]))
+    _spl_index = 0
+    _cspl = _spl[_spl_index]
 
-    servers = rootNSs
-    server = rootNSs[5]
-    server_index = 0
-    result = ""
 
+def main():
+    global _domain, _spl, _spl_index, _cspl
+
+    set_domain('cnn-tls.map.fastly.net')
     test_cspl = 'cnn-tls.map.fastly.net'
     test_server = '185.31.17.78'
+
+    root_index = 0
+    server = _root_ns[root_index]
     while True:
-        log("[spl]", cspl)
-        query = dns.message.make_query(cspl, dns.rdatatype.NS)
+        log("[spl]", _cspl)
+        query = dns.message.make_query(_cspl, dns.rdatatype.NS)
         response = dns.query.tcp(query, server)
 
         answer = response.answer
@@ -65,9 +54,15 @@ def main():
         log("additional", additional)
 
         if len(answer) > 0:
-            if cspl != domain:
-                spl_index += 1
-                cspl = spl[spl_index]
+            log(answer)
+            set_domain(_domain)
+            root_index += 1
+            server = _root_ns[root_index]
+            continue
+
+            if _cspl != _domain:
+                _spl_index += 1
+                cspl = _spl[_spl_index]
                 server = answer[0][0].address
                 continue
             if answer[0].rdtype == dns.rdatatype.A:
@@ -82,12 +77,14 @@ def main():
                 log("rrset", rrset)
                 if rrset[0].rdtype == dns.rdatatype.A:
                     server = rrset[0].address
-                    spl_index += 1
-                    cspl = spl[spl_index]
+                    _spl_index += 1
+                    _cspl = _spl[_spl_index]
                     break
         else:
-            server_index += 1
-            server = rootNSs[server_index]
+            set_domain(_domain)
+            root_index += 1
+            server = _root_ns[root_index]
+            continue
 
 
     print_result(result)
