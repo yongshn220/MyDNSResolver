@@ -1,5 +1,6 @@
 import sys
-import dns.resolver
+import dns.message
+import dns.query
 import datetime
 import time
 import math
@@ -12,11 +13,11 @@ def send_error(code):
         exit(0)
     if code == 2:
         print(f"Error: No corresponding IP to [{domain_input}].")
-        exit(0)
 
 def print_result(result):
     if result is None:
         send_error(2)
+        exit(0)
 
     print("QUESTION SECTION:")
     print(f"{domain_input} IN A")
@@ -41,6 +42,7 @@ def main():
         send_error(0)
     domain_input = domain
     dname = dns.name.from_text(domain)
+
     result = rec_roots(dname)
     print_result(result)
 
@@ -56,9 +58,9 @@ def rec_roots(dname):
 def rec(ip, dname):
     query = dns.message.make_query(dname, dns.rdatatype.A)
     try:
-        response = dns.query.tcp(query, ip)
+        response = dns.query.udp(query, ip)
     except Exception:
-        return send_error(2)
+        return None
 
     if len(response.answer) > 0:
         for ans in response.answer:
@@ -73,6 +75,13 @@ def rec(ip, dname):
                 continue
             for rr in rrset:
                 result = rec(rr.address, dname)  # recursive
+                if result:
+                    return result
+    if len(response.authority) > 0:
+        for rrset in response.authority:
+            if rrset.rdtype == dns.rdatatype.NS:
+                rrset = rec_roots(rrset[0].target)  # recursive root
+                result = rec(rrset[0].address, dname)  # recursive
                 if result:
                     return result
     return None

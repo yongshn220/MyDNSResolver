@@ -45,13 +45,13 @@ def collect_results(name: str) -> dict:
     full_response = {}
     target_name = dns.name.from_text(name)
     # lookup CNAME
-    # response = lookup(target_name, dns.rdatatype.CNAME)
-    # cnames = []
-    # if response:
-    #     answers = response.answer
-    #     for answer in answers:
-    #         target_name = dns.name.from_text(str(answer[0]))
-    #         cnames.append({"name": target_name, "alias": name})
+    response = lookup(target_name, dns.rdatatype.CNAME)
+    cnames = []
+    if response:
+        answers = response.answer
+        for answer in answers:
+            target_name = dns.name.from_text(str(answer[0]))
+            cnames.append({"name": target_name, "alias": name})
     # lookup A
     response = lookup(target_name, dns.rdatatype.A)
     arecords = []
@@ -79,7 +79,7 @@ def collect_results(name: str) -> dict:
                                   "preference": answer.preference,
                                   "exchange": str(answer.exchange)})
 
-    # full_response["CNAME"] = cnames
+    full_response["CNAME"] = cnames
     full_response["A"] = arecords
     full_response["AAAA"] = aaaarecords
     full_response["MX"] = mxrecords
@@ -175,18 +175,17 @@ def main():
     if run from the command line, take args and call
     printresults(lookup(hostname))
     """
-    # argument_parser = argparse.ArgumentParser()
-    # argument_parser.add_argument("name", nargs="+",
-    #                              help="DNS name(s) to look up")
-    # argument_parser.add_argument("-v", "--verbose",
-    #                              help="increase output verbosity",
-    #                              action="store_true")
-    # program_args = argument_parser.parse_args()
-    # for a_domain_name in program_args.name:
-    a_domain_name = 'www.naver.com'
-    result = collect_results(a_domain_name)
-    if (result != -1):
-        print_results(result)
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("name", nargs="+",
+                                 help="DNS name(s) to look up")
+    argument_parser.add_argument("-v", "--verbose",
+                                 help="increase output verbosity",
+                                 action="store_true")
+    program_args = argument_parser.parse_args()
+    for a_domain_name in program_args.name:
+        result = collect_results(a_domain_name)
+        if (result != -1):
+            print_results(result)
 
 if __name__ == "__main__":
     main()
