@@ -14,6 +14,7 @@ def send_error(code):
     if code == 2:
         print(f"Error: No corresponding IP to [{domain_input}].")
 
+
 def print_result(result):
     if result is None:
         send_error(2)
@@ -35,11 +36,11 @@ def main():
     global domain_input
     domain = None
     if len(sys.argv) == 1:
-        domain = input()
+        domain = input("Enter domain name: ")
     elif len(sys.argv) == 2:
         domain = sys.argv[1]
     else:
-        send_error(0)
+        send_error(1)
     domain_input = domain
     dname = dns.name.from_text(domain)
 
