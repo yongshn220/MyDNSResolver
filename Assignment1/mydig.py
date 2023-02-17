@@ -79,6 +79,7 @@ def rec(ip, dname):
     query = dns.message.make_query(dname, dns.rdatatype.A)
     try:
         response = dns.query.udp(query, ip)
+        # response = dns.query.tcp(query, ip)
     except Exception:
         return None
 
@@ -98,9 +99,9 @@ def rec(ip, dname):
                 if result:
                     return result
     if len(response.authority) > 0:
-        for rrset in response.authority:
+        for rrset in response.authority[0]:
             if rrset.rdtype == dns.rdatatype.NS:
-                rrset = rec_roots(rrset[0].target)  # recursive root
+                rrset = rec_roots(rrset.target)  # recursive root
                 result = rec(rrset[0].address, dname)  # recursive
                 if result:
                     return result
@@ -113,5 +114,6 @@ cname_response = []
 
 # init
 root_ns = ["198.41.0.4", "199.9.14.201", "192.33.4.12", "199.7.91.13", "192.203.230.10", "192.5.5.241", "192.112.36.4", "198.97.190.53", "192.36.148.17", "192.58.128.30", "193.0.14.129", "199.7.83.42"]
+root_ns = ["198.41.0.4"]
 start_time = time.time()
 main()
