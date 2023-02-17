@@ -29,10 +29,25 @@ Output #2:
     When: 2023-02-11 22:47:40.606980
 
 ----------------------------------------------------------------------------------
+Case 3 : NO exact IP for the Domain -> result bottom most NS ip.
+----------------------------------------------------------------------------------
+Input #3
+    > python3 ./mydig.py  www.cnncccnn.com
+Output #3
+    QUESTION SECTION:
+    www.cnncccnn.com                       IN    A
 
-Input #3:
+    AUTHORITY SECTION:
+    a.gtld-servers.net.            172800  IN    A     192.5.6.30
+
+    Query time: 39 msec
+    When: 2023-02-16 23:53:15.227104
+
+----------------------------------------------------------------------------------
+
+Input #4:
     > python3 ./mydig.py google.co.jp
-Output #3:
+Output #4:
     QUESTION SECTION:
     google.co.jp                           IN    A
 
